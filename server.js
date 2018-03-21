@@ -1,51 +1,28 @@
-// Dependencies
-const express = require("express");
-const bodyParser = require("body-parser");
-const logger = require("morgan");
-const mongoose = require("mongoose");
-const request = require("request");
-const cheerio = require("cheerio");
-const exphbs = require('express-handlebars');
+var express = require("express");
+var bodyParser = require("body-parser");
+require("dotenv").config();
 
-// Requiring our Note and Article models
-const Note = require("./models/Note.js");
-const Article = require("./models/Article.js");
-
-mongoose.Promise = Promise;
-
-// Initialize Express
-const app = express();
+var app = express();
 var PORT = process.env.PORT || 3000;
 
-// Use morgan and body parser with our app
-app.use(logger("dev"));
-app.use(bodyParser.urlencoded({
-    extended: false
-}));
+// Parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+app.use(express.static("./public"));
+
+// Require and set up handlebars
+var exphbs = require("express-handlebars");
+app.engine("handlebars", exphbs({ defaultLayout: "main" }));
+app.set("view engine", "handlebars");
 
 
-app.use(express.static("public"));
+// Import routes and give the server access to them.
+var routes = require("./controllers/scraper_controller.js");
+app.use(routes);
 
-// Database configuration with mongoose
-mongoose.connect("mongodb://localhost/newsScraper", {
-    useMongoClient: true
+
+
+app.listen(PORT, function() {
+  console.log("listening on port", PORT);
 });
-const db = mongoose.connection;
-db.on("error", function (error) {
-    console.log("Mongoose Error: ", error);
-});
-db.once("open", function () {
-    console.log("Mongoose connection successful.");
-});
 
-// Setup Handlebars
-app.engine('handlebars', exphbs({ defaultLayout: 'main' }));
-app.set('view engine', 'handlebars');
-
-//Connect to routes
-require('./routes/index.js')(app);
-
-
-app.listen(PORT, function () {
-    console.log("App running on port 3000!");
-});
