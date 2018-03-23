@@ -20,8 +20,6 @@ app.set("view engine", "handlebars");
 var routes = require("./controllers/scraper_controller.js");
 app.use(routes);
 
-
-
 app.listen(PORT, function() {
   console.log("listening on port", PORT);
 });
